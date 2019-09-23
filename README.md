@@ -23,7 +23,8 @@ There's quite a few components that come with the project. Below is an overview 
 │  ├─ ControlTower.Infrastructure.Tests - Tests for the infrastructure project
 │  ├─ ControlTower.Core - Contains the core code for the control tower
 │  ├─ ControlTower.Core.Tests - The tests for the control tower core 
-│  └─ ControlTower.Web - Contains the web components for the control tower
+│  ├─ ControlTower.Web - Contains the web components for the control tower
+│  └─ ControlTower.Web.Tests - Tests for the web project
 ├─ VirtualPrinter - The digital twin against which control tower is tested
 │  ├─ VirtualPrinter.Tests - The tests for the virtual printer
 │  └─ VirtualPrinter - The implementation of the virtual printer
