@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace ControlTower.Core.Tests
+namespace ControlTower.Tests
 {
     public class UnitTest1
     {
