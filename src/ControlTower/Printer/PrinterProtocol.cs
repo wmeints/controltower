@@ -77,9 +77,10 @@ namespace ControlTower.Printer
         /// </summary>
         public void Disconnect()
         {
-            _transport.Disconnect();
-
             _active = false;
+            _sendingThread.Abort();
+            _receivingThread.Abort();
+            _transport.Disconnect();
         }
 
         /// <summary>
