@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Extensions.Logging;
@@ -19,7 +20,10 @@ namespace ControlTower.Printer
     {
         private static readonly Regex SplitPattern = new Regex("\\s+");
         private static readonly Regex ResendPattern = new Regex("N:?|:");
-
+        private static readonly Regex AmbientTemperaturePattern = new Regex(@"T:(?<temp>(\d+)(\.(\d+)))?");
+        private static readonly Regex HotEndTemperaturePattern = new Regex(@"E:(?<temp>(\d+)(\.(\d+)))?");
+        private static readonly Regex BedTemperaturePattern = new Regex(@"B:(?<temp>(\d+)(\.(\d+)))?");
+        
         private readonly ILogger<PrinterProtocol> _logger;
         private readonly IPrinterTransport _transport;
         private readonly Semaphore _sendSemaphore;
@@ -29,13 +33,13 @@ namespace ControlTower.Printer
         private readonly Thread _sendingThread;
         private readonly Thread _receivingThread;
         private readonly Dictionary<int, PrinterCommand> _transmittedLines;
-        
+
         private bool _active = true;
         private bool _waitingForReply;
         private bool _resending;
         private int _resendLineNumber;
         private int _lineNumber;
-        
+
         /// <summary>
         /// Initializes a new instance of <see cref="PrinterProtocol"/>
         /// </summary>
@@ -58,6 +62,11 @@ namespace ControlTower.Printer
         /// Gets raised when a command was successfully processed.
         /// </summary>
         public event EventHandler CommandProcessed;
+
+        /// <summary>
+        /// Gets raised when temperature readings were reported.
+        /// </summary>
+        public event EventHandler<TemperatureReportedEventArgs> TemperatureReported;
 
         /// <summary>
         /// Connects the protocol to the transport layer and starts the read/write logic.
@@ -172,14 +181,30 @@ namespace ControlTower.Printer
             // When we receive one of these messages, we're cleared to send data.
             if (line.StartsWith("start") || line.StartsWith("Gbrl ") || line.StartsWith("ok"))
             {
-                //TODO: Confirm command to printer
+                CommandProcessed?.Invoke(this, EventArgs.Empty);
                 _sendSemaphore.Release();
             }
 
             // This section deals with the temperature callbacks from the printer.
-            if (line.StartsWith("ok") && line.Contains("T:"))
+            if (line.StartsWith("T:"))
             {
-                //TODO: Process temperature read-outs
+                var bedTemperatureMatch = BedTemperaturePattern.Match(line);
+                var hotEndTemperatureMatch = HotEndTemperaturePattern.Match(line);
+                var ambientTemperatureMatch = AmbientTemperaturePattern.Match(line);
+
+                float? ParseTemperature(Match m) => m switch
+                {
+                    { Value: var t } => float.Parse(t),
+                    _ => (float?)null
+                };
+
+                var eventArgs = new TemperatureReportedEventArgs(
+                    ParseTemperature(ambientTemperatureMatch),
+                    ParseTemperature(bedTemperatureMatch),
+                    ParseTemperature(hotEndTemperatureMatch));
+
+                TemperatureReported?.Invoke(this, eventArgs);
+
                 _sendSemaphore.Release();
             }
 
@@ -215,10 +240,11 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Switches the protocol to resend mode and fires the <see cref="ResendRequested"/> event.
+        /// Switches the protocol to resend mode.
         /// <para>
         /// The protocol switches back to normal operation mode once the line counter has gone beyond
         /// the value that it had before processing the resend request.
+        /// </para>
         /// </summary>
         /// <param name="resendIndex">Line number to start resending at</param>
         private void RequestResend(int resendIndex)
@@ -293,7 +319,8 @@ namespace ControlTower.Printer
         {
             if (_commandQueue.Count == 0)
             {
-                _queueSemaphore.WaitOne();
+                // Use a timed wait to prevent deadlocks during shutdown.
+                _queueSemaphore.WaitOne(TimeSpan.FromSeconds(5));
             }
         }
 
