@@ -1,5 +1,4 @@
 using Akka.TestKit.Xunit2;
-using ControlTower.Controller;
 using ControlTower.Printer;
 using ControlTower.Printer.Messages;
 using Xunit;

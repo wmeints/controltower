@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Akka.Actor;
-using ControlTower.Controller;
 using ControlTower.Printer.Messages;
 
 namespace ControlTower.Printer
