@@ -1,75 +1,80 @@
-using System.Threading;
-using Castle.DynamicProxy.Generators.Emitters;
-using ControlTower.Printer;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Debug;
-using Moq;
+using Akka.TestKit.Xunit2;
+using ControlTower.Controller;
+using ControlTower.Printer.Messages;
 using Xunit;
 
 namespace ControlTower.Tests
 {
-    public class PrinterProtocolTests
+    public class PrinterProtocolTests: TestKit
     {
         [Fact]
-        public void PrinterProtocol_WhenTransmitting_ReceivesResponses()
+        public void CanConnect()
         {
-            var loggerFactory = new LoggerFactory(new [] { new DebugLoggerProvider() });
-            var logger = loggerFactory.CreateLogger<PrinterProtocol>();
+            var printer = CreateTestProbe();
+            var protocol = ActorOf(PrinterProtocol.Props(printer));
+            var transport = CreateTestProbe();
             
-            Mock<IPrinterTransport> transport = new Mock<IPrinterTransport>();
-            PrinterProtocol protocol = new PrinterProtocol(transport.Object, logger);
+            protocol.Tell(new ConnectProtocol(transport), TestActor);
+            transport.ExpectMsg<ConnectTransport>();
             
-            transport.Setup(mock => mock.ReadLine()).Returns("ok");
+            protocol.Tell(DisconnectProtocol.Instance, TestActor);
+            transport.ExpectMsg<DisconnectTransport>();
             
-            protocol.Connect();
-            protocol.SendCommand("G0");
-            
-            transport.Verify(x => x.WriteLine(It.IsAny<string>()));
         }
 
         [Fact]
-        public void PrinterProtocol_WhenReceivingResend_ResendsMissingCommands()
+        public void CanSendAndReceiveCommands()
         {
-            var loggerFactory = new LoggerFactory(new [] { new DebugLoggerProvider() });
-            var logger = loggerFactory.CreateLogger<PrinterProtocol>();
-            var triggerResend = false;
+            var protocol = ActorOf(PrinterProtocol.Props());
+            var transport = CreateTestProbe();
             
-            Mock<IPrinterTransport> transport = new Mock<IPrinterTransport>();
-            PrinterProtocol protocol = new PrinterProtocol(transport.Object, logger);
+            protocol.Tell(new ConnectProtocol(transport), TestActor);
 
-            transport.SetupGet(mock => mock.RequiresChecksum).Returns(true);
-            
-            transport.Setup(mock => mock.WriteLine(It.IsAny<string>())).Callback((string text) =>
-            {
-                if (text == "N2 G1*42")
-                {
-                    triggerResend = true;
-                }
-            });
-            
-            transport.Setup(mock => mock.ReadLine()).Returns(() =>
-            {
-                if (triggerResend)
-                {
-                    triggerResend = false;
-                    return "rsnd N1";
-                }
+            transport.ExpectMsg<ConnectTransport>();
 
-                return "ok";
-            });
+            protocol.Tell(new PrinterCommand(1, "G0"), TestActor);
+            protocol.Tell(new PrinterCommand(2, "G1"), TestActor);
+            transport.ExpectMsg<PrinterCommand>(x => x.LineNumber == 1);
             
-            transport.Setup(mock => mock.ReadLine()).Returns("ok");
+            protocol.Tell(new PrinterResponse("ok"), transport);
             
-            protocol.Connect();
-            protocol.SendCommand("G0",1, true);
-            protocol.SendCommand("G1", 2, true);
+            protocol.Tell(new PrinterCommand(2, "G1"), TestActor);
+            transport.ExpectMsg<PrinterCommand>(x=> x.LineNumber == 2);
+        }
+
+        [Fact]
+        public void CanHandleResends()
+        {
+            var protocol = ActorOf(PrinterProtocol.Props());
+            var transport = CreateTestProbe();
             
-            Thread.Sleep(100);
+            protocol.Tell(new ConnectProtocol(transport), TestActor);
+            transport.ExpectMsg<ConnectTransport>();
             
-            transport.Verify(x => x.WriteLine("N1 G0*40"));
-            transport.Verify(x => x.WriteLine("N2 G1*42"));
-            transport.Verify(x => x.WriteLine("N1 G0*40"));
-            transport.Verify(x => x.WriteLine("N2 G1*42"));
+            protocol.Tell(new PrinterCommand(1, "G0"), TestActor);
+            transport.ExpectMsg<PrinterCommand>(x => x.LineNumber == 1);
+            
+            protocol.Tell(new PrinterResponse("ok"), transport);
+            
+            protocol.Tell(new PrinterCommand(2, "G1"), TestActor);
+            transport.ExpectMsg<PrinterCommand>(x => x.LineNumber == 2);
+            
+            protocol.Tell(new PrinterResponse("rsnd N:1"), transport);
+            transport.ExpectMsg<PrinterCommand>(x => x.LineNumber == 1);
+            
+            protocol.Tell(new PrinterResponse("ok"), transport);
+            transport.ExpectMsg<PrinterCommand>(x => x.LineNumber == 2);
+            
+            protocol.Tell(new PrinterResponse("ok"), transport);
+        }
+
+        [Fact]
+        public void CanHandleAsyncTemperatureReports()
+        {
+            var protocol = ActorOf(PrinterProtocol.Props());
+            var transport = CreateTestProbe();
+            
+            //TODO: Send a command and reply with an out-of-band temperature report + ok.
         }
     }
 }
