@@ -6,6 +6,9 @@ using ControlTower.Printer.Messages;
 
 namespace ControlTower.Printer
 {
+    /// <summary>
+    /// Implements the protocol layer for the 3D printer.
+    /// </summary>
     public class PrinterProtocol : ReceiveActor, IWithUnboundedStash
     {
         private static readonly Regex ResendPattern = new Regex("N:?|:");
@@ -21,6 +24,10 @@ namespace ControlTower.Printer
         
         private bool _waitingForResponse;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="PrinterProtocol"/>
+        /// </summary>
+        /// <param name="printer"></param>
         public PrinterProtocol(IActorRef printer)
         {
             _printer = printer;
@@ -28,13 +35,24 @@ namespace ControlTower.Printer
             Disconnected();
         }
 
+        /// <summary>
+        /// Creates the properties for the protocol layer
+        /// </summary>
+        /// <param name="printer">Printer device to connect the protocol layer</param>
+        /// <returns>Returns the actor properties</returns>
         public static Akka.Actor.Props Props(IActorRef printer)
         {
             return new Props(typeof(PrinterProtocol), new object[] { printer });
         }
 
+        /// <summary>
+        /// Gets or sets the stash used by the actor
+        /// </summary>
         public IStash Stash { get; set; }
 
+        /// <summary>
+        /// Configures the actor to the disconnected state
+        /// </summary>
         private void Disconnected()
         {
             Receive<TransportDisconnected>(_ =>
@@ -45,6 +63,9 @@ namespace ControlTower.Printer
             Receive<ConnectProtocol>(ConnectToTransport);
         }
 
+        /// <summary>
+        /// Configures the actor the idle state
+        /// </summary>
         private void Idle()
         {
             Receive<PrinterCommand>(ProcessIncomingCommand);
@@ -52,6 +73,9 @@ namespace ControlTower.Printer
             Receive<DisconnectProtocol>(DisconnectFromTransport);
         }
 
+        /// <summary>
+        /// Configures the actor to wait for a printer response
+        /// </summary>
         private void WaitingForResponse()
         {
             Receive<PrinterResponse>(ProcessIncomingResponse);
@@ -59,6 +83,9 @@ namespace ControlTower.Printer
             ReceiveAny(cmd => Stash.Stash());
         }
 
+        /// <summary>
+        /// Configures the actor the the resending state
+        /// </summary>
         private void ResendingCommands()
         {
             Receive<PrinterResponse>(ProcessIncomingResponse);
@@ -68,6 +95,9 @@ namespace ControlTower.Printer
             ReceiveAny(_ => Stash.Stash());
         }
 
+        /// <summary>
+        /// Configures the actor to the connecting state
+        /// </summary>
         private void Connecting()
         {
             Receive<TransportConnected>(_ =>
@@ -81,9 +111,13 @@ namespace ControlTower.Printer
             ReceiveAny(_ => Stash.Stash());
         }
 
-        private void ConnectToTransport(ConnectProtocol obj)
+        /// <summary>
+        /// Connects the protocol layer to the transport layer
+        /// </summary>
+        /// <param name="msg">Message to handle</param>
+        private void ConnectToTransport(ConnectProtocol msg)
         {
-            _transport = obj.Transport;
+            _transport = msg.Transport;
             _flightRecorder = Context.ActorOf(FlightRecorder.Props(Self), "flight-recorder");
 
             _transport.Tell(ConnectTransport.Instance);
@@ -91,6 +125,10 @@ namespace ControlTower.Printer
             Become(Connecting);
         }
 
+        /// <summary>
+        /// Processes the incoming printer data
+        /// </summary>
+        /// <param name="msg">Message to handle</param>
         private void ProcessIncomingResponse(PrinterResponse msg)
         {
             if (msg.Text.Contains("T:"))
@@ -132,6 +170,10 @@ namespace ControlTower.Printer
             }
         }
 
+        /// <summary>
+        /// Processes an incoming printer command
+        /// </summary>
+        /// <param name="msg">Message to process</param>
         private void ProcessIncomingCommand(PrinterCommand msg)
         {
             if (msg.LineNumber != null)
@@ -145,6 +187,10 @@ namespace ControlTower.Printer
             BecomeStacked(WaitingForResponse);
         }
 
+        /// <summary>
+        /// Processes the resend command coming from the flight recorder.
+        /// </summary>
+        /// <param name="msg">Message to resend</param>
         private void ProcessResendCommand(ResendCommand msg)
         {
             _transport.Tell(msg.Command);
@@ -153,7 +199,11 @@ namespace ControlTower.Printer
             BecomeStacked(WaitingForResponse);
         }
 
-        private void CompleteResend(ResendCompleted obj)
+        /// <summary>
+        /// Completes the resend procedure
+        /// </summary>
+        /// <param name="_">Message to handle</param>
+        private void CompleteResend(ResendCompleted _)
         {
             UnbecomeStacked();
         }
