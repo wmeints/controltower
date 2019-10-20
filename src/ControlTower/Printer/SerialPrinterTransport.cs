@@ -44,7 +44,10 @@ namespace ControlTower.Controller
         {
             Receive<ConnectTransport>(_ =>
             {
+                _protocol.Tell(TransportConnected.Instance);
+
                 _port.Open();
+                
                 Become(Connected);
             });
         }
@@ -59,7 +62,10 @@ namespace ControlTower.Controller
             
             Receive<DisconnectTransport>(_ =>
             {
+                _protocol.Tell(TransportDisconnected.Instance);
+
                 _port.Close();
+
                 Become(Disconnected);
             });
         }
@@ -81,7 +87,9 @@ namespace ControlTower.Controller
         private void ReadData(ReadFromPrinter obj)
         {
             var line = _port.ReadLine();
+
             _protocol.Tell(new PrinterResponse(line));
+
             Self.Tell(ReadFromPrinter.Instance);
         }
     }

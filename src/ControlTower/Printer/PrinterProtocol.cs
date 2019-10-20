@@ -2,9 +2,10 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Akka.Actor;
+using ControlTower.Controller;
 using ControlTower.Printer.Messages;
 
-namespace ControlTower.Controller
+namespace ControlTower.Printer
 {
     public class PrinterProtocol : ReceiveActor, IWithUnboundedStash
     {
@@ -36,6 +37,11 @@ namespace ControlTower.Controller
 
         private void Disconnected()
         {
+            Receive<TransportDisconnected>(_ =>
+            {
+                _printer.Tell(ProtocolDisconnected.Instance);
+            });
+
             Receive<ConnectProtocol>(ConnectToTransport);
         }
 
@@ -62,6 +68,19 @@ namespace ControlTower.Controller
             ReceiveAny(_ => Stash.Stash());
         }
 
+        private void Connecting()
+        {
+            Receive<TransportConnected>(_ =>
+            {
+                _printer.Tell(ProtocolConnected.Instance);
+
+                Stash.UnstashAll();
+                Become(Idle);
+            });
+
+            ReceiveAny(_ => Stash.Stash());
+        }
+
         private void ConnectToTransport(ConnectProtocol obj)
         {
             _transport = obj.Transport;
@@ -69,7 +88,7 @@ namespace ControlTower.Controller
 
             _transport.Tell(ConnectTransport.Instance);
             
-            Become(Idle);
+            Become(Connecting);
         }
 
         private void ProcessIncomingResponse(PrinterResponse msg)
@@ -139,6 +158,10 @@ namespace ControlTower.Controller
             UnbecomeStacked();
         }
 
+        /// <summary>
+        /// Disconnects from the transport layer
+        /// </summary>
+        /// <param name="obj">Incoming message</param>
         private void DisconnectFromTransport(DisconnectProtocol obj)
         {
             _transport.Tell(DisconnectTransport.Instance, Self);
@@ -147,11 +170,16 @@ namespace ControlTower.Controller
             Become(Disconnected);
         }
 
+        /// <summary>
+        /// Parses temperature reading from text received from the transport layer.
+        /// </summary>
+        /// <param name="text">Text received from the transport layer</param>
+        /// <returns>Returns a tuple containing the ambient, bed, and finally, the hotend temperature</returns>
         private (float?, float?, float?) ParseTemperatureReadings(string text)
         {
-            float? ParseTemperatureReading(string text, Regex pattern)
+            float? ParseTemperatureReading(string raw, Regex pattern)
             {
-                if (pattern.Match(text) is { Value: var value })
+                if (pattern.Match(raw) is { Value: var value })
                 {
                     return Single.Parse(value);
                 }
