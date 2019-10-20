@@ -7,7 +7,7 @@ namespace ControlTower.Printer
     /// <summary>
     /// Implements a transport layer for the printer over serial port.
     /// <para>
-    /// Continously reads data from the serial port and delivers the responses
+    /// Continuously reads data from the serial port and delivers the responses
     /// to the connected protocol layer. 
     /// </para>
     /// <para>
