@@ -1,9 +1,8 @@
 using System.IO.Ports;
 using Akka.Actor;
-using Akka.IO;
 using ControlTower.Printer.Messages;
 
-namespace ControlTower.Controller
+namespace ControlTower.Printer
 {
     /// <summary>
     /// Implements a transport layer for the printer over serial port.
@@ -17,11 +16,11 @@ namespace ControlTower.Controller
     /// layer.
     /// </para>
     /// </summary>
-    public class SerialPrinterTransport: ReceiveActor
+    public class SerialPrinterTransport : ReceiveActor
     {
         private readonly IActorRef _protocol;
         private readonly SerialPort _port;
-        
+
         /// <summary>
         /// Initializes a new instance of <see cref="SerialPrinterTransport"/>
         /// </summary>
@@ -34,7 +33,20 @@ namespace ControlTower.Controller
             _port = new SerialPort(portName, baudRate);
 
             Disconnected();
+        }
 
+        /// <summary>
+        /// Creates actor properties for the <see cref="SerialPrinterTransport"/> actor.
+        /// </summary>
+        /// <param name="portName">Port name to connect to</param>
+        /// <param name="baudRate">Baud rate to use for communicating with the printer</param>
+        /// <param name="protocol">Protocol to use for handling printer communication</param>
+        /// <returns>Returns the actor props</returns>
+        public static Akka.Actor.Props Props(string portName, int baudRate, IActorRef protocol)
+        {
+            return new Props(
+                typeof(SerialPrinterTransport), 
+                new object[] { portName, baudRate, protocol });
         }
 
         /// <summary>
@@ -47,7 +59,7 @@ namespace ControlTower.Controller
                 _protocol.Tell(TransportConnected.Instance);
 
                 _port.Open();
-                
+
                 Become(Connected);
             });
         }
@@ -59,7 +71,7 @@ namespace ControlTower.Controller
         {
             Receive<PrinterCommand>(WriteData);
             Receive<ReadFromPrinter>(ReadData);
-            
+
             Receive<DisconnectTransport>(_ =>
             {
                 _protocol.Tell(TransportDisconnected.Instance);
@@ -76,7 +88,7 @@ namespace ControlTower.Controller
         /// <param name="obj"></param>
         private void WriteData(PrinterCommand obj)
         {
-            _port.WriteLine(obj.Serialize());            
+            _port.WriteLine(obj.Serialize());
         }
 
         /// <summary>

@@ -15,10 +15,11 @@ namespace ControlTower.Printer
         private static readonly Regex HotEndTemperaturePattern = new Regex(@"E:(?<temp>(\d+)(\.(\d+)))?");
         private static readonly Regex BedTemperaturePattern = new Regex(@"B:(?<temp>(\d+)(\.(\d+)))?");
 
+        private readonly IActorRef _printer;
+
         private IActorRef _transport;
         private IActorRef _flightRecorder;
-        private IActorRef _printer;
-
+        
         private bool _waitingForResponse;
 
         public PrinterProtocol(IActorRef printer)
