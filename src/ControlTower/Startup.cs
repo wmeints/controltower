@@ -42,17 +42,13 @@ namespace ControlTower
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseHttpsRedirection();
-            }
-
+            
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapRazorPages();
                 endpoints.MapBlazorHub();
+                endpoints.MapFallbackToPage("/_Host");
             });
         }
     }

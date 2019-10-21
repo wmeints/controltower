@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29411.108
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D7D17F44-8E72-4990-A813-182CA2831FC2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlTower", "src\ControlTower\ControlTower.csproj", "{5128BBC1-049D-4470-BD42-2C7359F96022}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControlTower", "src\ControlTower\ControlTower.csproj", "{5128BBC1-049D-4470-BD42-2C7359F96022}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E1A00B6D-D363-4DBA-AAB7-33E99066E354}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlTower.Tests", "tests\ControlTower.Tests\ControlTower.Tests.csproj", "{36FD47C8-1A8F-4E34-BC79-E4EB0E5F4E15}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControlTower.Tests", "tests\ControlTower.Tests\ControlTower.Tests.csproj", "{36FD47C8-1A8F-4E34-BC79-E4EB0E5F4E15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,9 +19,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{5128BBC1-049D-4470-BD42-2C7359F96022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -49,8 +46,14 @@ Global
 		{36FD47C8-1A8F-4E34-BC79-E4EB0E5F4E15}.Release|x86.ActiveCfg = Release|Any CPU
 		{36FD47C8-1A8F-4E34-BC79-E4EB0E5F4E15}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5128BBC1-049D-4470-BD42-2C7359F96022} = {D7D17F44-8E72-4990-A813-182CA2831FC2}
 		{36FD47C8-1A8F-4E34-BC79-E4EB0E5F4E15} = {E1A00B6D-D363-4DBA-AAB7-33E99066E354}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2919DF69-9AD7-480C-9288-E2B54C49596D}
 	EndGlobalSection
 EndGlobal
