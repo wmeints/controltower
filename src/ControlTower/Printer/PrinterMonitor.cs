@@ -28,5 +28,14 @@ namespace ControlTower.Printer
                 status.HotEndTemperature = msg.HotEndTemperature;
             });
         }
+
+        /// <summary>
+        ///     Creates the actor properties for the printer monitor
+        /// </summary>
+        /// <returns>Returns the actor properties</returns>
+        public static Akka.Actor.Props Props()
+        {
+            return new Props(typeof(PrinterMonitor));
+        }
     }
 }

@@ -17,9 +17,19 @@ namespace ControlTower.Printer
         public PrinterDevice(IActorRef monitor)
         {
             _monitor = monitor;
-            _protocol = Context.ActorOf(PrinterProtocol.Props(Self), "Protocol");
+            _protocol = Context.ActorOf(PrinterProtocol.Props(Self), "protocol");
 
             Disconnected();
+        }
+
+        /// <summary>
+        /// Creates the actor properties for the printer
+        /// </summary>
+        /// <param name="monitor">Monitor to use</param>
+        /// <returns>Returns the actor properties</returns>
+        public static Akka.Actor.Props Props(IActorRef monitor)
+        {
+            return new Props(typeof(PrinterDevice), new object[] {monitor});
         }
 
         public IStash Stash { get; set; }
@@ -81,7 +91,7 @@ namespace ControlTower.Printer
         private void ConnectToProtocolAndTransport(ConnectDevice msg)
         {
             var transport = Context.ActorOf(SerialPrinterTransport.Props(
-                msg.PortName, msg.BaudRate, _protocol));
+                msg.PortName, msg.BaudRate, _protocol),"transport");
 
             _protocol.Tell(new ConnectProtocol(transport));
 
