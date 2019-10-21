@@ -1,14 +1,14 @@
 namespace ControlTower.Printer.Messages
 {
     /// <summary>
-    /// This message is used to send commands to the printer.
-    /// Commands from a job have a line number associated with them.
-    /// Other commands don't use this mechanic.
+    ///     This message is used to send commands to the printer.
+    ///     Commands from a job have a line number associated with them.
+    ///     Other commands don't use this mechanic.
     /// </summary>
     public class PrinterCommand
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="PrinterCommand"/>
+        ///     Initializes a new instance of <see cref="PrinterCommand" />
         /// </summary>
         /// <param name="lineNumber"></param>
         /// <param name="text"></param>
@@ -19,17 +19,17 @@ namespace ControlTower.Printer.Messages
         }
 
         /// <summary>
-        /// Gets the line number for the command
+        ///     Gets the line number for the command
         /// </summary>
         public int? LineNumber { get; }
 
         /// <summary>
-        /// Gets the command text to send
+        ///     Gets the command text to send
         /// </summary>
         public string Text { get; }
-        
+
         /// <summary>
-        /// Converts the command into its serialized form
+        ///     Converts the command into its serialized form
         /// </summary>
         /// <returns></returns>
         public string Serialize()
@@ -46,7 +46,7 @@ namespace ControlTower.Printer.Messages
         }
 
         /// <summary>
-        /// Calculates the checksum for the command.
+        ///     Calculates the checksum for the command.
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
@@ -55,12 +55,8 @@ namespace ControlTower.Printer.Messages
             int checksum = text[0];
 
             if (text.Length > 1)
-            {
-                for (int i = 1; i < text.Length; i++)
-                {
+                for (var i = 1; i < text.Length; i++)
                     checksum = checksum ^ text[i];
-                }
-            }
 
             return checksum;
         }

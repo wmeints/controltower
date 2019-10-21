@@ -1,12 +1,12 @@
 namespace ControlTower.Printer.Messages
 {
     /// <summary>
-    /// This message is sent by the flight recorder to the protocol layer to resend a command
+    ///     This message is sent by the flight recorder to the protocol layer to resend a command
     /// </summary>
     public class ResendCommand
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ResendCommand"/>
+        ///     Initializes a new instance of <see cref="ResendCommand" />
         /// </summary>
         /// <param name="command">Command to resend</param>
         public ResendCommand(PrinterCommand command)
@@ -15,7 +15,7 @@ namespace ControlTower.Printer.Messages
         }
 
         /// <summary>
-        /// Gets the command to replay
+        ///     Gets the command to replay
         /// </summary>
         public PrinterCommand Command { get; }
     }
