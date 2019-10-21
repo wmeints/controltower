@@ -57,6 +57,7 @@ namespace ControlTower.Printer
             // NOTE: Automatically start reporting temperatures upon connection.
             // This assumes that the printer supports it, so I might need to check for the feature toggle.
             _protocol.Tell(new PrinterCommand(null, "M105"));
+            _monitor.Tell(DeviceConnected.Instance);
 
             Receive<TemperatureReported>(HandleTemperatureReport);
             Receive<DisconnectDevice>(DisconnectFromProtocol);
@@ -67,7 +68,12 @@ namespace ControlTower.Printer
         /// </summary>
         private void Disconnecting()
         {
-            Receive<ProtocolDisconnected>(_ => Become(Disconnected));
+            Receive<ProtocolDisconnected>(_ =>
+            {
+                _monitor.Tell(DeviceDisconnected.Instance);
+                Become(Disconnected);
+            });
+
             ReceiveAny(_ => { });
         }
 
