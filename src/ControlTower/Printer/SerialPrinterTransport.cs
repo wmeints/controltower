@@ -5,24 +5,24 @@ using ControlTower.Printer.Messages;
 namespace ControlTower.Printer
 {
     /// <summary>
-    /// Implements a transport layer for the printer over serial port.
-    /// <para>
-    /// Continuously reads data from the serial port and delivers the responses
-    /// to the connected protocol layer. 
-    /// </para>
-    /// <para>
-    /// Write commands are processed as they come in from the protocol layer.
-    /// This is an important detail of this actor, flow control is maintained in the protocol
-    /// layer.
-    /// </para>
+    ///     Implements a transport layer for the printer over serial port.
+    ///     <para>
+    ///         Continuously reads data from the serial port and delivers the responses
+    ///         to the connected protocol layer.
+    ///     </para>
+    ///     <para>
+    ///         Write commands are processed as they come in from the protocol layer.
+    ///         This is an important detail of this actor, flow control is maintained in the protocol
+    ///         layer.
+    ///     </para>
     /// </summary>
     public class SerialPrinterTransport : ReceiveActor
     {
-        private readonly IActorRef _protocol;
         private readonly SerialPort _port;
+        private readonly IActorRef _protocol;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="SerialPrinterTransport"/>
+        ///     Initializes a new instance of <see cref="SerialPrinterTransport" />
         /// </summary>
         /// <param name="portName">Port name to use</param>
         /// <param name="baudRate">Baud rate to use for communication</param>
@@ -36,21 +36,21 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Creates actor properties for the <see cref="SerialPrinterTransport"/> actor.
+        ///     Creates actor properties for the <see cref="SerialPrinterTransport" /> actor.
         /// </summary>
         /// <param name="portName">Port name to connect to</param>
         /// <param name="baudRate">Baud rate to use for communicating with the printer</param>
         /// <param name="protocol">Protocol to use for handling printer communication</param>
         /// <returns>Returns the actor props</returns>
-        public static Akka.Actor.Props Props(string portName, int baudRate, IActorRef protocol)
+        public static Props Props(string portName, int baudRate, IActorRef protocol)
         {
             return new Props(
-                typeof(SerialPrinterTransport), 
-                new object[] { portName, baudRate, protocol });
+                typeof(SerialPrinterTransport),
+                new object[] {portName, baudRate, protocol});
         }
 
         /// <summary>
-        /// Configures the disconnected state for the actor
+        ///     Configures the disconnected state for the actor
         /// </summary>
         private void Disconnected()
         {
@@ -65,7 +65,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Configures the connected state for the actor
+        ///     Configures the connected state for the actor
         /// </summary>
         private void Connected()
         {
@@ -83,7 +83,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Handles incoming printer commands
+        ///     Handles incoming printer commands
         /// </summary>
         /// <param name="obj"></param>
         private void WriteData(PrinterCommand obj)
@@ -92,8 +92,8 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Reads from the serial ports and sends the result to the protocol layer.
-        /// This method schedules itself again to get the next line of data from the printer.
+        ///     Reads from the serial ports and sends the result to the protocol layer.
+        ///     This method schedules itself again to get the next line of data from the printer.
         /// </summary>
         /// <param name="obj"></param>
         private void ReadData(ReadFromPrinter obj)

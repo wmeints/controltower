@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ControlTower.Printer
 {
@@ -9,10 +6,8 @@ namespace ControlTower.Printer
     {
         private float? _ambientTemperature;
         private float? _bedTemperature;
-        private float? _hotEndTemperature;
         private bool _connected;
-
-        public event EventHandler PrinterStatusChanged;
+        private float? _hotEndTemperature;
 
         public float? AmbientTemperature
         {
@@ -53,5 +48,7 @@ namespace ControlTower.Printer
                 PrinterStatusChanged?.Invoke(this, EventArgs.Empty);
             }
         }
+
+        public event EventHandler PrinterStatusChanged;
     }
 }

@@ -7,7 +7,7 @@ using ControlTower.Printer.Messages;
 namespace ControlTower.Printer
 {
     /// <summary>
-    /// Implements the protocol layer for the 3D printer.
+    ///     Implements the protocol layer for the 3D printer.
     /// </summary>
     public class PrinterProtocol : ReceiveActor, IWithUnboundedStash
     {
@@ -18,14 +18,14 @@ namespace ControlTower.Printer
         private static readonly Regex BedTemperaturePattern = new Regex(@"B:(?<temp>(\d+)(\.(\d+)))?");
 
         private readonly IActorRef _printer;
+        private IActorRef _flightRecorder;
 
         private IActorRef _transport;
-        private IActorRef _flightRecorder;
-        
+
         private bool _waitingForResponse;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="PrinterProtocol"/>
+        ///     Initializes a new instance of <see cref="PrinterProtocol" />
         /// </summary>
         /// <param name="printer"></param>
         public PrinterProtocol(IActorRef printer)
@@ -36,35 +36,32 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Creates the properties for the protocol layer
-        /// </summary>
-        /// <param name="printer">Printer device to connect the protocol layer</param>
-        /// <returns>Returns the actor properties</returns>
-        public static Akka.Actor.Props Props(IActorRef printer)
-        {
-            return new Props(typeof(PrinterProtocol), new object[] { printer });
-        }
-
-        /// <summary>
-        /// Gets or sets the stash used by the actor
+        ///     Gets or sets the stash used by the actor
         /// </summary>
         public IStash Stash { get; set; }
 
         /// <summary>
-        /// Configures the actor to the disconnected state
+        ///     Creates the properties for the protocol layer
+        /// </summary>
+        /// <param name="printer">Printer device to connect the protocol layer</param>
+        /// <returns>Returns the actor properties</returns>
+        public static Props Props(IActorRef printer)
+        {
+            return new Props(typeof(PrinterProtocol), new object[] {printer});
+        }
+
+        /// <summary>
+        ///     Configures the actor to the disconnected state
         /// </summary>
         private void Disconnected()
         {
-            Receive<TransportDisconnected>(_ =>
-            {
-                _printer.Tell(ProtocolDisconnected.Instance);
-            });
+            Receive<TransportDisconnected>(_ => { _printer.Tell(ProtocolDisconnected.Instance); });
 
             Receive<ConnectProtocol>(ConnectToTransport);
         }
 
         /// <summary>
-        /// Configures the actor the idle state
+        ///     Configures the actor the idle state
         /// </summary>
         private void Idle()
         {
@@ -74,7 +71,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Configures the actor to wait for a printer response
+        ///     Configures the actor to wait for a printer response
         /// </summary>
         private void WaitingForResponse()
         {
@@ -84,7 +81,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Configures the actor the the resending state
+        ///     Configures the actor the the resending state
         /// </summary>
         private void ResendingCommands()
         {
@@ -96,7 +93,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Configures the actor to the connecting state
+        ///     Configures the actor to the connecting state
         /// </summary>
         private void Connecting()
         {
@@ -112,7 +109,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Connects the protocol layer to the transport layer
+        ///     Connects the protocol layer to the transport layer
         /// </summary>
         /// <param name="msg">Message to handle</param>
         private void ConnectToTransport(ConnectProtocol msg)
@@ -121,12 +118,12 @@ namespace ControlTower.Printer
             _flightRecorder = Context.ActorOf(FlightRecorder.Props(Self), "flight-recorder");
 
             _transport.Tell(ConnectTransport.Instance);
-            
+
             Become(Connecting);
         }
 
         /// <summary>
-        /// Processes the incoming printer data
+        ///     Processes the incoming printer data
         /// </summary>
         /// <param name="msg">Message to handle</param>
         private void ProcessIncomingResponse(PrinterResponse msg)
@@ -138,7 +135,6 @@ namespace ControlTower.Printer
             }
 
             if (msg.Text.StartsWith("ok") || msg.Text.StartsWith("start") || msg.Text.StartsWith("Gbrl "))
-            {
                 if (_waitingForResponse)
                 {
                     _waitingForResponse = false;
@@ -148,7 +144,6 @@ namespace ControlTower.Printer
                     Stash.UnstashAll();
                     UnbecomeStacked();
                 }
-            }
 
             if (msg.Text.StartsWith("resend") || msg.Text.StartsWith("rs"))
             {
@@ -171,15 +166,12 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Processes an incoming printer command
+        ///     Processes an incoming printer command
         /// </summary>
         /// <param name="msg">Message to process</param>
         private void ProcessIncomingCommand(PrinterCommand msg)
         {
-            if (msg.LineNumber != null)
-            {
-                _flightRecorder.Tell(msg);
-            }
+            if (msg.LineNumber != null) _flightRecorder.Tell(msg);
 
             _transport.Tell(msg);
 
@@ -188,7 +180,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Processes the resend command coming from the flight recorder.
+        ///     Processes the resend command coming from the flight recorder.
         /// </summary>
         /// <param name="msg">Message to resend</param>
         private void ProcessResendCommand(ResendCommand msg)
@@ -200,7 +192,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Completes the resend procedure
+        ///     Completes the resend procedure
         /// </summary>
         /// <param name="_">Message to handle</param>
         private void CompleteResend(ResendCompleted _)
@@ -209,7 +201,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Disconnects from the transport layer
+        ///     Disconnects from the transport layer
         /// </summary>
         /// <param name="obj">Incoming message</param>
         private void DisconnectFromTransport(DisconnectProtocol obj)
@@ -221,7 +213,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Parses temperature reading from text received from the transport layer.
+        ///     Parses temperature reading from text received from the transport layer.
         /// </summary>
         /// <param name="text">Text received from the transport layer</param>
         /// <returns>Returns a tuple containing the ambient, bed, and finally, the hotend temperature</returns>
@@ -229,10 +221,7 @@ namespace ControlTower.Printer
         {
             float? ParseTemperatureReading(string raw, Regex pattern)
             {
-                if (pattern.Match(raw) is { Value: var value })
-                {
-                    return Single.Parse(value);
-                }
+                if (pattern.Match(raw) is { Value: var value }) return float.Parse(value);
 
                 return null;
             }
@@ -244,5 +233,4 @@ namespace ControlTower.Printer
             );
         }
     }
-
 }

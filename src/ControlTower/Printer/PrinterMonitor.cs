@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Akka.Actor;
+﻿using Akka.Actor;
 using ControlTower.Printer.Messages;
 
 namespace ControlTower.Printer
 {
     /// <summary>
-    /// Handles printer status reports and translates to stuff that Blazor understands.
+    ///     Handles printer status reports and translates to stuff that Blazor understands.
     /// </summary>
-    public class PrinterMonitor: ReceiveActor
+    public class PrinterMonitor : ReceiveActor
     {
         private readonly PrinterStatus _status;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="PrinterMonitor"/>
+        ///     Initializes a new instance of <see cref="PrinterMonitor" />
         /// </summary>
         /// <param name="status">Status object to connect to</param>
         public PrinterMonitor(PrinterStatus status)

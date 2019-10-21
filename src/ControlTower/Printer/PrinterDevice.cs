@@ -1,23 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Akka.Actor;
-using Akka.IO;
+﻿using Akka.Actor;
 using ControlTower.Printer.Messages;
 
 namespace ControlTower.Printer
 {
     /// <summary>
-    /// Implementation of the printer's application layer.
+    ///     Implementation of the printer's application layer.
     /// </summary>
     public class PrinterDevice : ReceiveActor, IWithUnboundedStash
     {
-        private readonly IActorRef _protocol;
         private readonly IActorRef _monitor;
+        private readonly IActorRef _protocol;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="PrinterDevice"/>
+        ///     Initializes a new instance of <see cref="PrinterDevice" />
         /// </summary>
         public PrinterDevice(IActorRef monitor)
         {
@@ -27,8 +22,10 @@ namespace ControlTower.Printer
             Disconnected();
         }
 
+        public IStash Stash { get; set; }
+
         /// <summary>
-        /// Configures the actor to the disconnected state
+        ///     Configures the actor to the disconnected state
         /// </summary>
         private void Disconnected()
         {
@@ -36,7 +33,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Configures the actor to the connecting state
+        ///     Configures the actor to the connecting state
         /// </summary>
         private void Connecting()
         {
@@ -50,7 +47,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Configures the actor to the connected state
+        ///     Configures the actor to the connected state
         /// </summary>
         private void Connected()
         {
@@ -64,7 +61,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Configures the actor to the disconnecting state
+        ///     Configures the actor to the disconnecting state
         /// </summary>
         private void Disconnecting()
         {
@@ -78,7 +75,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Wires up the protocol and transport layers for the printer.
+        ///     Wires up the protocol and transport layers for the printer.
         /// </summary>
         /// <param name="msg">Command to handle</param>
         private void ConnectToProtocolAndTransport(ConnectDevice msg)
@@ -92,7 +89,7 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Disconnects the printer from the protocol layer
+        ///     Disconnects the printer from the protocol layer
         /// </summary>
         /// <param name="_">Command to handle</param>
         private void DisconnectFromProtocol(DisconnectDevice _)
@@ -102,14 +99,12 @@ namespace ControlTower.Printer
         }
 
         /// <summary>
-        /// Handles temperature reports from the protocol layer
+        ///     Handles temperature reports from the protocol layer
         /// </summary>
         /// <param name="msg">Message containing temperature measurements</param>
         private void HandleTemperatureReport(TemperatureReported msg)
         {
             _monitor.Tell(msg);
         }
-
-        public IStash Stash { get; set; }
     }
 }
