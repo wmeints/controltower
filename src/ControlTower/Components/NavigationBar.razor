@@ -1,0 +1,41 @@
+﻿
+@inject IPrinterService PrinterService
+@inject PrinterStatus PrinterStatus
+<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 fixed-top shadow">
+    <div class="container">
+        <div class="ml-md-3 navbar-brand">Control Tower</div>
+        <div class="ml-md-auto">
+            <PrinterConnectionForm Connected="@PrinterStatus.Connected" OnConnect="@ConnectToPrinter" OnDisconnect="@DisconnectFromPrinter" AvailablePorts="@AvailablePorts"/>
+        </div>
+    </div>
+</nav>
+@code {
+
+    IEnumerable<string> AvailablePorts { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AvailablePorts = await PrinterService.GetAvailablePortsAsync();
+
+        PrinterStatus.PrinterStatusChanged += (s, e) =>
+        {
+            StateHasChanged();
+        };
+    }
+
+    async Task DisconnectFromPrinter(EventArgs _)
+    {
+        await PrinterService.DisconnectAsync();
+    }
+
+    async Task ConnectToPrinter(ConnectEventArgs e)
+    {
+        if (e.PortName == null)
+        {
+            //TODO: Display an alert!
+            return;
+        }
+
+        await PrinterService.ConnectAsync(e.PortName, e.BaudRate);
+    }
+}

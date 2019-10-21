@@ -1,3 +1,24 @@
 ﻿@page "/"
+@using System.Runtime.CompilerServices
+@inject PrinterStatus PrinterStatus
 
-    <h1>Homepage</h1>
+<div class="container">
+    <div class="row">
+        <TemperatureIndicator Description="Ambient temperature" Value="PrinterStatus.AmbientTemperature" />
+        <TemperatureIndicator Description="Bed temperature" Value="PrinterStatus.BedTemperature" />
+        <TemperatureIndicator Description="Hot-end temperature" Value="PrinterStatus.HotEndTemperature"/>
+    </div>
+</div>
+
+@code
+{
+
+    protected override void OnInitialized()
+    {
+        PrinterStatus.PrinterStatusChanged += (s, e) =>
+        {
+            this.StateHasChanged();
+        };
+    }
+
+}

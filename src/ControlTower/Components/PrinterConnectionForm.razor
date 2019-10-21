@@ -1,0 +1,58 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+    <form class="form-inline mr-md-3">
+        <span class="navbar-text">Port</span>
+        <select class="form-control ml-2 mr-2" @bind="SelectedPort" disabled="@Connected">
+            <option value="">Select a port</option>
+            @foreach (var item in AvailablePorts)
+            {
+                <option value="@item">@item</option>
+            }
+        </select>
+        <span class="navbar-text">Baud rate</span>
+        <select class="form-control ml-2 mr-2" @bind="SelectedBaudRate" disabled="@Connected">
+            <option>250000</option>
+            <option>230400</option>
+            <option>115200</option>
+            <option>38400</option>
+            <option>19200</option>
+            <option>9600</option>
+        </select>
+        @if (Connected)
+        {
+            <button type="button" class="btn btn-primary my-2 my-lg-0" @onclick="DisconnectFromPrinter">Disconnect</button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-primary my-2 my-lg-0" @onclick="ConnectToPrinter">Connect</button>
+        }
+
+    </form>
+
+@code {
+    public string SelectedPort { get; set; }
+
+    public int SelectedBaudRate { get; set; } = 115200;
+
+    [Parameter]
+    public IEnumerable<string> AvailablePorts { get; set; }
+
+    [Parameter]
+    public bool Connected { get; set; }
+
+    [Parameter]
+    public EventCallback<ConnectEventArgs> OnConnect { get; set; }
+
+    [Parameter]
+    public EventCallback<EventArgs> OnDisconnect { get; set; }
+
+    async Task ConnectToPrinter()
+    {
+        await OnConnect.InvokeAsync(new ConnectEventArgs(SelectedPort, SelectedBaudRate));
+    }
+
+    async Task DisconnectFromPrinter()
+    {
+        await OnDisconnect.InvokeAsync(EventArgs.Empty);
+    }
+
+}

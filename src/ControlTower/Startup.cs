@@ -42,6 +42,8 @@ namespace ControlTower
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseStaticFiles();
             
             app.UseRouting();
 

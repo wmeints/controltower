@@ -1,0 +1,11 @@
+﻿body {
+    padding-top: 80px;
+}
+
+.border-left-primary {
+    border-left: .25rem solid #4e73df !important;
+}
+
+#page-not-found {
+    height: 100vh;
+}    

@@ -1,4 +1,5 @@
 using System.IO.Ports;
+using System.Threading.Tasks;
 using Akka.Actor;
 using ControlTower.Printer.Messages;
 
@@ -31,6 +32,7 @@ namespace ControlTower.Printer
         {
             _protocol = protocol;
             _port = new SerialPort(portName, baudRate);
+            _port.NewLine = "\n";
 
             Disconnected();
         }
@@ -46,7 +48,7 @@ namespace ControlTower.Printer
         {
             return new Props(
                 typeof(SerialPrinterTransport),
-                new object[] {portName, baudRate, protocol});
+                new object[] { portName, baudRate, protocol });
         }
 
         /// <summary>
@@ -55,13 +57,12 @@ namespace ControlTower.Printer
         private void Disconnected()
         {
             Receive<ConnectTransport>(_ =>
-            {
-                _protocol.Tell(TransportConnected.Instance);
+                {
+                    _port.Open();
+                    _protocol.Tell(TransportConnected.Instance);
 
-                _port.Open();
-
-                Become(Connected);
-            });
+                    Become(Connected);
+                });
         }
 
         /// <summary>
@@ -72,6 +73,12 @@ namespace ControlTower.Printer
             Receive<PrinterCommand>(WriteData);
             Receive<ReadFromPrinter>(ReadData);
 
+            Receive<PrinterResponse>(msg =>
+            {
+                _protocol.Tell(msg);
+                Self.Tell(ReadFromPrinter.Instance);
+            });
+
             Receive<DisconnectTransport>(_ =>
             {
                 _protocol.Tell(TransportDisconnected.Instance);
@@ -80,6 +87,8 @@ namespace ControlTower.Printer
 
                 Become(Disconnected);
             });
+
+            Self.Tell(ReadFromPrinter.Instance);
         }
 
         /// <summary>
@@ -98,11 +107,11 @@ namespace ControlTower.Printer
         /// <param name="obj"></param>
         private void ReadData(ReadFromPrinter obj)
         {
-            var line = _port.ReadLine();
-
-            _protocol.Tell(new PrinterResponse(line));
-
-            Self.Tell(ReadFromPrinter.Instance);
+            Task.Factory.StartNew(() =>
+            {
+                var line = _port.ReadLine();
+                return new PrinterResponse(line);
+            }).PipeTo(Self);
         }
     }
 }
