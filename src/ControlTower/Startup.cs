@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Akka.Actor;
 using ControlTower.Printer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -31,6 +26,9 @@ namespace ControlTower
 
             services.AddSingleton(printerStatus);
             services.AddSingleton<IPrinterService>(new PrinterService(printer));
+
+            services.AddServerSideBlazor();
+            services.AddRazorPages();
         }
 
         /// <summary>
@@ -44,15 +42,17 @@ namespace ControlTower
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseHttpsRedirection();
+            }
 
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!");
-                });
+                endpoints.MapRazorPages();
+                endpoints.MapBlazorHub();
             });
         }
     }
