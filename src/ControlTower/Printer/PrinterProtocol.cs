@@ -55,7 +55,10 @@ namespace ControlTower.Printer
         /// </summary>
         private void Disconnected()
         {
-            Receive<TransportDisconnected>(_ => { _printer.Tell(ProtocolDisconnected.Instance); });
+            Receive<TransportDisconnected>(_ =>
+            {
+                _printer.Tell(ProtocolDisconnected.Instance);
+            });
 
             Receive<ConnectProtocol>(ConnectToTransport);
         }

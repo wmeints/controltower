@@ -11,6 +11,7 @@ namespace ControlTower.Printer
     {
         private readonly IActorRef _monitor;
         private readonly IActorRef _protocol;
+        private ICancelable _temperatureMeasurements;
 
         /// <summary>
         ///     Initializes a new instance of <see cref="PrinterDevice" />
@@ -64,10 +65,10 @@ namespace ControlTower.Printer
         {
             // Schedule the M105 printer command to retrieve temperature readings.
             // This is the best way to do it, since not all printers support the M155 command.
-            Context.System.Scheduler.ScheduleTellRepeatedly(
+            _temperatureMeasurements = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(
                 TimeSpan.Zero, TimeSpan.FromSeconds(5),
                 _protocol, new PrinterCommand(null, "M105"), Self);
-
+            
             _monitor.Tell(DeviceConnected.Instance);
 
             Receive<TemperatureReported>(HandleTemperatureReport);
@@ -108,7 +109,9 @@ namespace ControlTower.Printer
         /// <param name="_">Command to handle</param>
         private void DisconnectFromProtocol(DisconnectDevice _)
         {
+            _temperatureMeasurements.Cancel(false);
             _protocol.Tell(DisconnectProtocol.Instance);
+            
             Become(Disconnecting);
         }
 
