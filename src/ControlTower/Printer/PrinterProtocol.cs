@@ -14,7 +14,7 @@ namespace ControlTower.Printer
         private static readonly Regex ResendPattern = new Regex("N:?|:");
         private static readonly Regex SplitPattern = new Regex("\\s+");
         private static readonly Regex AmbientTemperaturePattern = new Regex(@"T:(?<temp>(\d+)(\.(\d+)))?");
-        private static readonly Regex HotEndTemperaturePattern = new Regex(@"E:(?<temp>(\d+)(\.(\d+)))?");
+        private static readonly Regex HotEndTemperaturePattern = new Regex(@"T0:(?<temp>(\d+)(\.(\d+)))?");
         private static readonly Regex BedTemperaturePattern = new Regex(@"B:(?<temp>(\d+)(\.(\d+)))?");
 
         private readonly IActorRef _printer;
@@ -221,7 +221,12 @@ namespace ControlTower.Printer
         {
             float? ParseTemperatureReading(string raw, Regex pattern)
             {
-                if (pattern.Match(raw) is { Value: var value }) return float.Parse(value);
+                var m = pattern.Match(raw);
+
+                if(m.Success)
+                {
+                    return Single.Parse(m.Groups["temp"].Value);
+                }
 
                 return null;
             }

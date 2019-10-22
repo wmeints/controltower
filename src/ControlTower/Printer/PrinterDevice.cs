@@ -1,4 +1,5 @@
-﻿using Akka.Actor;
+﻿using System;
+using Akka.Actor;
 using ControlTower.Printer.Messages;
 
 namespace ControlTower.Printer
@@ -29,7 +30,7 @@ namespace ControlTower.Printer
         /// <returns>Returns the actor properties</returns>
         public static Akka.Actor.Props Props(IActorRef monitor)
         {
-            return new Props(typeof(PrinterDevice), new object[] {monitor});
+            return new Props(typeof(PrinterDevice), new object[] { monitor });
         }
 
         public IStash Stash { get; set; }
@@ -61,9 +62,12 @@ namespace ControlTower.Printer
         /// </summary>
         private void Connected()
         {
-            // NOTE: Automatically start reporting temperatures upon connection.
-            // This assumes that the printer supports it, so I might need to check for the feature toggle.
-            _protocol.Tell(new PrinterCommand(null, "M105"));
+            // Schedule the M105 printer command to retrieve temperature readings.
+            // This is the best way to do it, since not all printers support the M155 command.
+            Context.System.Scheduler.ScheduleTellRepeatedly(
+                TimeSpan.Zero, TimeSpan.FromSeconds(5),
+                _protocol, new PrinterCommand(null, "M105"), Self);
+
             _monitor.Tell(DeviceConnected.Instance);
 
             Receive<TemperatureReported>(HandleTemperatureReport);
@@ -91,7 +95,7 @@ namespace ControlTower.Printer
         private void ConnectToProtocolAndTransport(ConnectDevice msg)
         {
             var transport = Context.ActorOf(SerialPrinterTransport.Props(
-                msg.PortName, msg.BaudRate, _protocol),"transport");
+                msg.PortName, msg.BaudRate, _protocol), "transport");
 
             _protocol.Tell(new ConnectProtocol(transport));
 
