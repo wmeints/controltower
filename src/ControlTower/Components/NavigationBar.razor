@@ -5,7 +5,12 @@
     <div class="container">
         <div class="ml-md-3 navbar-brand">Control Tower</div>
         <div class="ml-md-auto">
-            <PrinterConnectionForm Connected="@PrinterStatus.Connected" OnConnect="@ConnectToPrinter" OnDisconnect="@DisconnectFromPrinter" AvailablePorts="@AvailablePorts"/>
+            <PrinterConnectionForm 
+                Connected="@PrinterStatus.Connected" 
+                OnConnect="@ConnectToPrinter" 
+                OnDisconnect="@DisconnectFromPrinter" 
+                AvailablePorts="@AvailablePorts"
+            />
         </div>
     </div>
 </nav>
@@ -17,9 +22,11 @@
     {
         AvailablePorts = await PrinterService.GetAvailablePortsAsync();
 
+        // Printer status changes happen on a background thread.
+        // That's why we use InvokeAsync here to update the UI.
         PrinterStatus.PrinterStatusChanged += (s, e) =>
         {
-            StateHasChanged();
+            this.InvokeAsync(() => this.StateHasChanged());
         };
     }
 

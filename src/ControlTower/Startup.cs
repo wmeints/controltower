@@ -21,7 +21,7 @@ namespace ControlTower
             var printerStatus = new PrinterStatus();
             var actorSystem = ActorSystem.Create("Printer");
 
-            var monitor = actorSystem.ActorOf(PrinterMonitor.Props(),"printer-monitor");
+            var monitor = actorSystem.ActorOf(PrinterMonitor.Props(printerStatus),"printer-monitor");
             var printer = actorSystem.ActorOf(PrinterDevice.Props(monitor), "printer");
 
             services.AddSingleton(printerStatus);

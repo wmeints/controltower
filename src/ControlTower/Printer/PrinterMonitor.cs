@@ -1,4 +1,5 @@
-﻿using Akka.Actor;
+﻿using System;
+using Akka.Actor;
 using ControlTower.Printer.Messages;
 
 namespace ControlTower.Printer
@@ -33,9 +34,9 @@ namespace ControlTower.Printer
         ///     Creates the actor properties for the printer monitor
         /// </summary>
         /// <returns>Returns the actor properties</returns>
-        public static Akka.Actor.Props Props()
+        public static Akka.Actor.Props Props(PrinterStatus status)
         {
-            return new Props(typeof(PrinterMonitor));
+            return new Props(typeof(PrinterMonitor), new object[] { status });
         }
     }
 }
