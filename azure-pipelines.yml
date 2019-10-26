@@ -18,3 +18,31 @@ steps:
   displayName: 'Build Portable binaries'
 - script: dotnet publish $(Build.SourcesDirectory)/src/ControlTower/ControlTower.csproj -c Release -r win10-arm -o $(Build.ArtifactStagingDirectory)/win10-arm
   displayName: 'Build Windows 10 ARM binaries'
+
+- task: ArchiveFiles@2
+  displayName: 'Compress Linux ARM Release'
+  inputs:
+    rootFolderOrFile: $(Build.ArtifactStagingDirectory)/linux-arm
+    includeRootFolder: false
+    archiveType: tar
+    tarCompression: gz
+    archiveFile: '$(Build.ArtifactStagingDirectory)/controltower-1.0.0.$(Build.BuildNumber)-linux-arm.tar.gz'
+    replaceExistingArchive: true
+
+- task: ArchiveFiles@2
+  displayName: 'Compress Windows 10 ARM Release'
+  inputs:
+    rootFolderOrFile: $(Build.ArtifactStagingDirectory)/win10-arm
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/controltower-1.0.0.$(Build.BuildNumber)-win10-arm.zip'
+    replaceExistingArchive: true
+
+- task: ArchiveFiles@2
+  displayName: 'Compress Portable Release'
+  inputs:
+    rootFolderOrFile: $(Build.ArtifactStagingDirectory)/portable
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/controltower-1.0.0.$(Build.BuildNumber)-portable.zip'
+    replaceExistingArchive: true
