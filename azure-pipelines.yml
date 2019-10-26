@@ -46,3 +46,9 @@ steps:
     archiveType: zip
     archiveFile: '$(Build.ArtifactStagingDirectory)/archives/controltower-$(Build.BuildNumber)-portable.zip'
     replaceExistingArchive: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: $(Build.ArtifactStagingDirectory)/archives/
+    ArtifactName: Archives
+    publishLocation: Container
