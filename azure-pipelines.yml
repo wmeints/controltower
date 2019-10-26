@@ -12,9 +12,9 @@ pool:
 steps:
 - script: dotnet restore
   displayName: 'Restore packages'
-- script: dotnet publish $(Build.SourcesDirectory)\src\ControlTower\ControlTower.csproj -c Release -r linux-arm -o $(Build.ArtifactStagingFolder)/linux-arm
+- script: dotnet publish $(Build.SourcesDirectory)/src/ControlTower/ControlTower.csproj -c Release -r linux-arm -o $(Build.ArtifactStagingFolder)/linux-arm
   displayName: 'Build Linux ARM binaries'
-- script: dotnet publish $(Build.SourcesDirectory)\src\ControlTower\ControlTower.csproj -c Release -o $(Build.ArtifactStagingFolder)/portable
+- script: dotnet publish $(Build.SourcesDirectory)/src/ControlTower/ControlTower.csproj -c Release -o $(Build.ArtifactStagingFolder)/portable
   displayName: 'Build Portable binaries'
-- script: dotnet publish $(Build.SourcesDirectory)\src\ControlTower\ControlTower.csproj -c Release -r win10-arm -o $(Build.ArtifactStagingFolder)/win10-arm
+- script: dotnet publish $(Build.SourcesDirectory)/src/ControlTower/ControlTower.csproj -c Release -r win10-arm -o $(Build.ArtifactStagingFolder)/win10-arm
   displayName: 'Build Windows 10 ARM binaries'
