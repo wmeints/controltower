@@ -26,7 +26,7 @@ steps:
     includeRootFolder: false
     archiveType: tar
     tarCompression: gz
-    archiveFile: '$(Build.ArtifactStagingDirectory)/controltower-1.0.0.$(Build.BuildNumber)-linux-arm.tar.gz'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/archives/controltower-1.0.0.$(Build.BuildNumber)-linux-arm.tar.gz'
     replaceExistingArchive: true
 
 - task: ArchiveFiles@2
@@ -35,7 +35,7 @@ steps:
     rootFolderOrFile: $(Build.ArtifactStagingDirectory)/win10-arm
     includeRootFolder: false
     archiveType: zip
-    archiveFile: '$(Build.ArtifactStagingDirectory)/controltower-1.0.0.$(Build.BuildNumber)-win10-arm.zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/archives/controltower-1.0.0.$(Build.BuildNumber)-win10-arm.zip'
     replaceExistingArchive: true
 
 - task: ArchiveFiles@2
@@ -44,5 +44,5 @@ steps:
     rootFolderOrFile: $(Build.ArtifactStagingDirectory)/portable
     includeRootFolder: false
     archiveType: zip
-    archiveFile: '$(Build.ArtifactStagingDirectory)/controltower-1.0.0.$(Build.BuildNumber)-portable.zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/archives/controltower-1.0.0.$(Build.BuildNumber)-portable.zip'
     replaceExistingArchive: true
