@@ -9,7 +9,7 @@ trigger:
 pr: 
   branches:
     include:
-      - dev
+      - develop
     exclude:
       - master    
 
