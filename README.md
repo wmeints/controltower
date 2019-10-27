@@ -21,4 +21,6 @@ The overall architecture and other information can be found on the [Wiki](https:
 
 ## Helping out
 
-Want to chip in and write some code? Cool, create a pull request and submit issues! I'd love to get some help with this project.
+Want to chip in and write some code? I'd love to get some help with this project.
+You can find a list of features I want to include in the product on the issues page. Can't find something you want? Let me know
+by submitting new issues.
