@@ -1,5 +1,4 @@
 ﻿@page "/"
-@using System.Runtime.CompilerServices
 @inject PrinterStatus PrinterStatus
 
 <div class="container">
@@ -8,9 +7,17 @@
         <TemperatureIndicator Description="Bed temperature" Value="PrinterStatus.BedTemperature" />
         <TemperatureIndicator Description="Hot-end temperature" Value="PrinterStatus.HotEndTemperature"/>
     </div>
+    
     <div class="row">
-        <StartJob></StartJob>
+        <JobStatus></JobStatus>
     </div>
+    
+    @if(PrinterStatus.Job.State == PrintJobState.None || PrinterStatus.Job.State == PrintJobState.Completed)
+    {
+        <div class="row">
+            <StartJob></StartJob>
+        </div>
+    }
 </div>
 
 @code
