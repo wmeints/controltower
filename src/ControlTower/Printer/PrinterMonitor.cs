@@ -28,6 +28,14 @@ namespace ControlTower.Printer
                 status.BedTemperature = msg.BedTemperature;
                 status.HotEndTemperature = msg.HotEndTemperature;
             });
+
+            Receive<PrintJobStepsCompleted>(msg =>
+            {
+                status.Job.StepsCompleted = msg.StepsCompleted;
+                status.Job.TotalSteps = msg.TotalSteps;
+            });
+
+            Receive<PrintJobStatusUpdated>(msg => { status.Job.State = msg.State; });
         }
 
         /// <summary>
