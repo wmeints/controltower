@@ -1,5 +1,7 @@
 ![Control Tower](./artwork/control-tower-logo.png)
 
+[![Build Status](https://dev.azure.com/wmeints/controltower/_apis/build/status/ControlTower%20-%20Master?branchName=master)](https://dev.azure.com/wmeints/controltower/_build/latest?definitionId=1&branchName=master)
+
 An [OctoPrint](https://octoprint.org/) inspired .NET Core based 3D Printer controller that runs from your Raspberry PI.
 
 ## Goals
@@ -19,4 +21,6 @@ The overall architecture and other information can be found on the [Wiki](https:
 
 ## Helping out
 
-Want to chip in and write some code? Cool, create a pull request and submit issues! I'd love to get some help with this project.
+Want to chip in and write some code? I'd love to get some help with this project.
+You can find a list of features I want to include in the product on the issues page. Can't find something you want? Let me know
+by submitting new issues.

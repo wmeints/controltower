@@ -1,0 +1,61 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pr: 
+  branches:
+    include:
+      - develop
+    exclude:
+      - master    
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: dotnet restore
+  displayName: 'Restore packages'
+- script: dotnet publish $(Build.SourcesDirectory)/src/ControlTower/ControlTower.csproj -c Release -r linux-arm -o $(Build.ArtifactStagingDirectory)/linux-arm
+  displayName: 'Build Linux ARM binaries'
+- script: dotnet publish $(Build.SourcesDirectory)/src/ControlTower/ControlTower.csproj -c Release -o $(Build.ArtifactStagingDirectory)/portable
+  displayName: 'Build Portable binaries'
+- script: dotnet publish $(Build.SourcesDirectory)/src/ControlTower/ControlTower.csproj -c Release -r win10-arm -o $(Build.ArtifactStagingDirectory)/win10-arm
+  displayName: 'Build Windows 10 ARM binaries'
+
+- task: ArchiveFiles@2
+  displayName: 'Compress Linux ARM Release'
+  inputs:
+    rootFolderOrFile: $(Build.ArtifactStagingDirectory)/linux-arm
+    includeRootFolder: false
+    archiveType: tar
+    tarCompression: gz
+    archiveFile: '$(Build.ArtifactStagingDirectory)/archives/controltower-$(Build.BuildNumber)-linux-arm.tar.gz'
+    replaceExistingArchive: true
+
+- task: ArchiveFiles@2
+  displayName: 'Compress Windows 10 ARM Release'
+  inputs:
+    rootFolderOrFile: $(Build.ArtifactStagingDirectory)/win10-arm
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/archives/controltower-$(Build.BuildNumber)-win10-arm.zip'
+    replaceExistingArchive: true
+
+- task: ArchiveFiles@2
+  displayName: 'Compress Portable Release'
+  inputs:
+    rootFolderOrFile: $(Build.ArtifactStagingDirectory)/portable
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/archives/controltower-$(Build.BuildNumber)-portable.zip'
+    replaceExistingArchive: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: $(Build.ArtifactStagingDirectory)/archives/
+    ArtifactName: Archives
+    publishLocation: Container
