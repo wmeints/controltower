@@ -8,7 +8,7 @@ namespace ControlTower.Printer
     /// <summary>
     /// Defines a printer job
     /// </summary>
-    public class PrintJob: ReceiveActor
+    public class PrintJob : ReceiveActor
     {
         private readonly int _totalCommands;
         private readonly Queue<PrinterCommand> _commands;
@@ -27,11 +27,13 @@ namespace ControlTower.Printer
         {
             var printerCommands = commands.ToList();
 
-            // Include 1 extra command, the M110 to reset the line counter.
-            // This extra command is necessary to make the printer behave correctly when printing multiple jobs.
-            _totalCommands = printerCommands.Count + 1;
-
+            // Enqueue the print job commands, including a reset line number command.
+            // This last command ensures that we can print a second time.
             _commands = new Queue<PrinterCommand>(printerCommands);
+            _commands.Enqueue(new PrinterCommand(_totalCommands + 1, "M110 N0"));
+
+            _totalCommands = printerCommands.Count;
+
             _device = device;
             _statusMonitor = statusMonitor;
 
@@ -56,12 +58,10 @@ namespace ControlTower.Printer
         private void NotStarted()
         {
             _statusMonitor.Tell(new PrintJobStatusUpdated(PrintJobState.Ready));
-            
+
             Receive<StartPrinting>(cmd =>
             {
-                // Send a reset command for the line number, otherwise the printer
-                // will think we're resending older lines.
-                _device.Tell(new PrinterCommand(null, "M110 N0"));
+                _device.Tell(_commands.Dequeue());
 
                 _statusMonitor.Tell(new PrintJobStatusUpdated(PrintJobState.Running));
                 _statusMonitor.Tell(new PrintJobStepsCompleted(0, _totalCommands));
