@@ -10,3 +10,5 @@ G1 X120 Y20 E10 F600 ; prime nozzle
 G1 X150 Y20 F5000 ; quick wipe
 M190 S0 ; Cool down the bed
 M109 S0 ; Cool down the hotend
+G92 E0 ; Reset extrusion distance
+G1 Z15 F6000 ; Lif the printer head
