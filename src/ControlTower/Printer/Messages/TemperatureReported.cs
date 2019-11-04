@@ -8,29 +8,22 @@
         /// <summary>
         ///     Initializes a new instance of <see cref="TemperatureReported" />
         /// </summary>
-        /// <param name="ambientTemperature">Ambient temperature reading</param>
         /// <param name="bedTemperature">Bed temperature reading</param>
         /// <param name="hotEndTemperature">Hot-end temperature reading</param>
-        public TemperatureReported(float? ambientTemperature, float? bedTemperature, float? hotEndTemperature)
+        public TemperatureReported(TemperatureReading bedTemperature, TemperatureReading hotEndTemperature)
         {
-            AmbientTemperature = ambientTemperature;
             BedTemperature = bedTemperature;
             HotEndTemperature = hotEndTemperature;
         }
 
         /// <summary>
-        ///     Gets the ambient temperature
-        /// </summary>
-        public float? AmbientTemperature { get; }
-
-        /// <summary>
         ///     Gets the temperature of the bed
         /// </summary>
-        public float? BedTemperature { get; }
+        public TemperatureReading BedTemperature { get; }
 
         /// <summary>
         ///     Gets the temperature of the hot-end
         /// </summary>
-        public float? HotEndTemperature { get; }
+        public TemperatureReading HotEndTemperature { get; }
     }
 }
