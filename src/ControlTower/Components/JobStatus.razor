@@ -16,5 +16,14 @@
 </div>
 
 @code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        PrinterStatus.Job.JobStatusChanged += (s, e) =>
+        {
+            InvokeAsync(StateHasChanged);
+        };
+    }
 
 }

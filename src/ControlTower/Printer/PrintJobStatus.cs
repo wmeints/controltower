@@ -54,6 +54,6 @@ namespace ControlTower.Printer
             }
         }
 
-        public EventHandler JobStatusChanged;
+        public event EventHandler JobStatusChanged;
     }
 }

@@ -97,6 +97,9 @@ namespace ControlTower.Printer
         /// </summary>
         private void Printing()
         {
+            Receive<PrinterCommandProcessed>(msg => _currentJob.Tell(msg));
+            Receive<PrinterCommand>(cmd => _protocol.Tell(cmd));
+
             Receive<TemperatureReported>(HandleTemperatureReport);
             Receive<DisconnectDevice>(DisconnectFromProtocol);
             Receive<PrintJobCompleted>(FinishPrintJob);
