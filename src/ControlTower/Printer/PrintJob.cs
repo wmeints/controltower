@@ -27,7 +27,10 @@ namespace ControlTower.Printer
         {
             var printerCommands = commands.ToList();
 
-            _totalCommands = printerCommands.Count;
+            // Include 1 extra command, the M110 to reset the line counter.
+            // This extra command is necessary to make the printer behave correctly when printing multiple jobs.
+            _totalCommands = printerCommands.Count + 1;
+
             _commands = new Queue<PrinterCommand>(printerCommands);
             _device = device;
             _statusMonitor = statusMonitor;
@@ -56,7 +59,9 @@ namespace ControlTower.Printer
             
             Receive<StartPrinting>(cmd =>
             {
-                _device.Tell(_commands.Dequeue());
+                // Send a reset command for the line number, otherwise the printer
+                // will think we're resending older lines.
+                _device.Tell(new PrinterCommand(null, "M110 N0"));
 
                 _statusMonitor.Tell(new PrintJobStatusUpdated(PrintJobState.Running));
                 _statusMonitor.Tell(new PrintJobStepsCompleted(0, _totalCommands));

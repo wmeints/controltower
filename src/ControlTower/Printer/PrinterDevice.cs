@@ -111,7 +111,7 @@ namespace ControlTower.Printer
         /// <param name="msg"></param>
         private void StartNewPrintJob(StartPrintJob msg)
         {
-            _currentJob = Context.ActorOf(PrintJob.Props(msg.Commands, Self, _monitor));
+            _currentJob = Context.ActorOf(PrintJob.Props(msg.Commands, Self, _monitor), "job");
             _currentJob.Tell(StartPrinting.Instance);
 
             BecomeStacked(Printing);
