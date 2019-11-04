@@ -9,6 +9,11 @@ namespace ControlTower.Printer
         private bool _connected;
         private float? _hotEndTemperature;
 
+        /// <summary>
+        /// Gets the job status information
+        /// </summary>
+        public PrintJobStatus Job { get; } = new PrintJobStatus();
+
         public float? AmbientTemperature
         {
             get => _ambientTemperature;
