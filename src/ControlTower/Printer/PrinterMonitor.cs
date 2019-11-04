@@ -24,10 +24,28 @@ namespace ControlTower.Printer
 
             Receive<TemperatureReported>(msg =>
             {
-                status.AmbientTemperature = msg.AmbientTemperature;
-                status.BedTemperature = msg.BedTemperature;
-                status.HotEndTemperature = msg.HotEndTemperature;
+                if (msg.HotEndTemperature != null)
+                {
+                    status.HotEndTemperature = status.HotEndTemperature != null ?
+                        status.HotEndTemperature.Merge(msg.HotEndTemperature) :
+                        msg.HotEndTemperature;
+                }
+
+                if (msg.BedTemperature != null)
+                {
+                    status.BedTemperature = status.BedTemperature != null ?
+                        status.BedTemperature.Merge(msg.BedTemperature) :
+                        msg.BedTemperature;
+                }
             });
+
+            Receive<PrintJobStepsCompleted>(msg =>
+            {
+                status.Job.StepsCompleted = msg.StepsCompleted;
+                status.Job.TotalSteps = msg.TotalSteps;
+            });
+
+            Receive<PrintJobStatusUpdated>(msg => { status.Job.State = msg.State; });
         }
 
         /// <summary>

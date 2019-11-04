@@ -13,9 +13,8 @@ namespace ControlTower.Printer
     {
         private static readonly Regex ResendPattern = new Regex("N:?|:");
         private static readonly Regex SplitPattern = new Regex("\\s+");
-        private static readonly Regex AmbientTemperaturePattern = new Regex(@"T:(?<temp>(\d+)(\.(\d+)))?");
-        private static readonly Regex HotEndTemperaturePattern = new Regex(@"T0:(?<temp>(\d+)(\.(\d+)))?");
-        private static readonly Regex BedTemperaturePattern = new Regex(@"B:(?<temp>(\d+)(\.(\d+)))?");
+        private static readonly Regex ToolTemperaturePattern = new Regex(@"T:(?<temp>(\d+)(\.(\d+)))?(\s*/(?<targetTemp>(\d+)(\.(\d+)))?)?");
+        private static readonly Regex BedTemperaturePattern = new Regex(@"B:(?<temp>(\d+)(\.(\d+)))?(\s*/(?<targetTemp>(\d+)(\.(\d+)))?)?");
 
         private readonly IActorRef _printer;
         private IActorRef _flightRecorder;
@@ -47,7 +46,7 @@ namespace ControlTower.Printer
         /// <returns>Returns the actor properties</returns>
         public static Props Props(IActorRef printer)
         {
-            return new Props(typeof(PrinterProtocol), new object[] {printer});
+            return new Props(typeof(PrinterProtocol), new object[] { printer });
         }
 
         /// <summary>
@@ -133,8 +132,8 @@ namespace ControlTower.Printer
         {
             if (msg.Text.Contains("T:"))
             {
-                var (ambientTemperature, bedTemperature, hotEndTemperature) = ParseTemperatureReadings(msg.Text);
-                _printer.Tell(new TemperatureReported(ambientTemperature, bedTemperature, hotEndTemperature));
+                var (bedTemperature, hotEndTemperature) = ParseTemperatureReadings(msg.Text);
+                _printer.Tell(new TemperatureReported(bedTemperature, hotEndTemperature));
             }
 
             if (msg.Text.StartsWith("ok") || msg.Text.StartsWith("start") || msg.Text.StartsWith("Gbrl "))
@@ -219,25 +218,38 @@ namespace ControlTower.Printer
         ///     Parses temperature reading from text received from the transport layer.
         /// </summary>
         /// <param name="text">Text received from the transport layer</param>
-        /// <returns>Returns a tuple containing the ambient, bed, and finally, the hotend temperature</returns>
-        private (float?, float?, float?) ParseTemperatureReadings(string text)
+        /// <returns>Returns a tuple containing the bed, and the hotend temperature</returns>
+        private (TemperatureReading, TemperatureReading) ParseTemperatureReadings(string text)
         {
-            float? ParseTemperatureReading(string raw, Regex pattern)
+            TemperatureReading ParseTemperatureReading(string raw, Regex pattern)
             {
                 var m = pattern.Match(raw);
 
-                if(m.Success)
+                if (m.Success && m.Groups["temp"].Success)
                 {
-                    return Single.Parse(m.Groups["temp"].Value);
+
+                    if (m.Groups["targetTemp"].Success)
+                    {
+                        return new TemperatureReading(
+                            float.Parse(m.Groups["temp"].Value),
+                            float.Parse(m.Groups["targetTemp"].Value)
+                        );
+                    }
+                    else
+                    {
+                        return new TemperatureReading(
+                            float.Parse(m.Groups["temp"].Value),
+                            null
+                        );
+                    }
                 }
 
                 return null;
             }
 
             return (
-                ParseTemperatureReading(text, AmbientTemperaturePattern),
                 ParseTemperatureReading(text, BedTemperaturePattern),
-                ParseTemperatureReading(text, HotEndTemperaturePattern)
+                ParseTemperatureReading(text, ToolTemperaturePattern)
             );
         }
     }

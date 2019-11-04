@@ -1,17 +1,10 @@
-﻿<div class="col-xl-4 col-md-6 mb-4">
+﻿<div class="col-xl-6 col-md-6 mb-4">
     <div class="card border-left-primary shadow h-100 py-2">
         <div class="card-body">
             <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
                     <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">@Description</div>
-                    @if (Value != null)
-                    {
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Value &deg;C</div>
-                    }
-                    else
-                    {
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">-</div>
-                    }
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">@GetReadingValues() &deg;C</div>
                 </div>
             </div>
         </div>
@@ -24,6 +17,14 @@
     public string Description { get; set; }
 
     [Parameter]
-    public float? Value { get; set; }
+    public TemperatureReading Reading { get; set; }
 
+    private string GetReadingValues()
+    {
+        
+        string readingValue = Reading != null && Reading.Value != null ? Reading.Value.ToString() : "-";
+        string targetReadingValue = Reading != null && Reading.TargetValue != null && Reading.TargetValue > 0 ? Reading.TargetValue.ToString() : "-";
+
+        return $"{readingValue}/{targetReadingValue}";
+    }
 }

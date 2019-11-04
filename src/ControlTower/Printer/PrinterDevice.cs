@@ -13,6 +13,8 @@ namespace ControlTower.Printer
         private readonly IActorRef _protocol;
         private ICancelable _temperatureMeasurements;
 
+        private IActorRef _currentJob;
+
         /// <summary>
         ///     Initializes a new instance of <see cref="PrinterDevice" />
         /// </summary>
@@ -73,6 +75,8 @@ namespace ControlTower.Printer
 
             Receive<TemperatureReported>(HandleTemperatureReport);
             Receive<DisconnectDevice>(DisconnectFromProtocol);
+
+            Receive<StartPrintJob>(StartNewPrintJob);
         }
 
         /// <summary>
@@ -87,6 +91,42 @@ namespace ControlTower.Printer
             });
 
             ReceiveAny(_ => { });
+        }
+
+        /// <summary>
+        ///     Configures the actor to the printing state
+        /// </summary>
+        private void Printing()
+        {
+            Receive<PrinterCommandProcessed>(msg => _currentJob.Tell(msg));
+            Receive<PrinterCommand>(cmd => _protocol.Tell(cmd));
+
+            Receive<TemperatureReported>(HandleTemperatureReport);
+            Receive<DisconnectDevice>(DisconnectFromProtocol);
+            Receive<PrintJobCompleted>(FinishPrintJob);
+        }
+
+        /// <summary>
+        ///     Starts a new print job
+        /// </summary>
+        /// <param name="msg"></param>
+        private void StartNewPrintJob(StartPrintJob msg)
+        {
+            _currentJob = Context.ActorOf(PrintJob.Props(msg.Commands, Self, _monitor), "job");
+            _currentJob.Tell(StartPrinting.Instance);
+
+            BecomeStacked(Printing);
+        }
+
+        /// <summary>
+        ///     Completes the current print job
+        /// </summary>
+        /// <param name="_"></param>
+        private void FinishPrintJob(PrintJobCompleted _)
+        {
+            _currentJob.GracefulStop(TimeSpan.FromMilliseconds(50));
+
+            UnbecomeStacked();
         }
 
         /// <summary>

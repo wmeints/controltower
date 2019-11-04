@@ -1,0 +1,35 @@
+﻿@page "/"
+@inject PrinterStatus PrinterStatus
+
+<div class="container">
+    <div class="row">
+        <TemperatureIndicator Description="Bed temperature" Reading="PrinterStatus.BedTemperature" />
+        <TemperatureIndicator Description="Hot-end temperature" Reading="PrinterStatus.HotEndTemperature"/>
+    </div>
+    
+    <div class="row">
+        <JobStatus></JobStatus>
+    </div>
+    
+    @if(PrinterStatus.Job.State == PrintJobState.None || PrinterStatus.Job.State == PrintJobState.Completed)
+    {
+        <div class="row">
+            <StartJob></StartJob>
+        </div>
+    }
+</div>
+
+@code
+{
+
+    protected override void OnInitialized()
+    {
+        // Printer status changes happen on a background thread.
+        // That's why we use InvokeAsync here to update the UI.
+        PrinterStatus.PrinterStatusChanged += (s, e) =>
+        {
+            InvokeAsync(StateHasChanged);
+        };
+    }
+
+}

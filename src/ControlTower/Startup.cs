@@ -1,4 +1,5 @@
 using Akka.Actor;
+using Blazor.FileReader;
 using ControlTower.Printer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,8 +28,15 @@ namespace ControlTower
             services.AddSingleton(printerStatus);
             services.AddSingleton<IPrinterService>(new PrinterService(printer));
 
-            services.AddServerSideBlazor();
+            services.AddServerSideBlazor().AddHubOptions(options =>
+            {
+                // Allow uploads up to 30MB
+                options.MaximumReceiveMessageSize = 1024 * 1024 * 30;
+            });
+
             services.AddRazorPages();
+
+            services.AddFileReaderService(options => { options.InitializeOnFirstCall = true; });
         }
 
         /// <summary>

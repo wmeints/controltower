@@ -1,3 +1,4 @@
+using System;
 using System.IO.Ports;
 using System.Threading.Tasks;
 using Akka.Actor;
@@ -107,13 +108,16 @@ namespace ControlTower.Printer
         /// <param name="obj"></param>
         private void ReadData(ReadFromPrinter obj)
         {
-            // We have to run the readline in the background outside of the actor.
-            // The result should then be fed back into the actor using a pipe-to command.
-            Task.Factory.StartNew(() =>
+            if (_port.IsOpen)
             {
-                var line = _port.ReadLine();
-                return new PrinterResponse(line);
-            }).PipeTo(Self);
+                // We have to run the readline in the background outside of the actor.
+                // The result should then be fed back into the actor using a pipe-to command.
+                Task.Factory.StartNew(() =>
+                {
+                    var line = _port.ReadLine();
+                    return new PrinterResponse(line);
+                }).PipeTo(Self);
+            }
         }
     }
 }
