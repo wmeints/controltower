@@ -19,18 +19,24 @@ jobs:
       run: dotnet publish src/ControlTower/ControlTower.csproj -c Release -r win10-arm -o bin/arm-windows
     - name: Publish Portable binaries
       run: dotnet publish src/ControlTower/ControlTower.csproj -c Release -o bin/portable
-    - name: Zip ARM Linux binaries
-      uses: TheDoctor0/zip-release/@v0.2.0
+    - name: Upload artifact (ARM Linux)
+      uses: actions/upload-artifact@v1.0.0
       with:
-        filename: controltower-arm-linux.zip
+        # Artifact name
+        name: controltower-arm-linux
+        # Directory containing files to upload
         path: bin/arm-linux
-    - name: Zip ARM Windows binaries
-      uses: TheDoctor0/zip-release/@v0.2.0
+    - name: Upload artifact (ARM Windows)
+      uses: actions/upload-artifact@v1.0.0
       with:
-        filename: controltower-arm-windows.zip
+        # Artifact name
+        name: controltower-arm-windows
+        # Directory containing files to upload
         path: bin/arm-windows
-    - name: Zip Portable binaries
-      uses: TheDoctor0/zip-release/@v0.2.0
+    - name: Upload artifact (Portable)
+      uses: actions/upload-artifact@v1.0.0
       with:
-        filename: controltower-portable.zip
+        # Artifact name
+        name: controltower-portable
+        # Directory containing files to upload
         path: bin/portable
