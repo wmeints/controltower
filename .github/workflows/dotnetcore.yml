@@ -1,4 +1,4 @@
-name: .NET Core
+name: Build releases
 
 on: [push]
 
@@ -12,7 +12,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 2.2.108
+        dotnet-version: 3.0.100
     - name: Publish ARM Linux binaries
       run: dotnet publish src/ControlTower/ControlTower.csproj -c Release -r linux-arm -o bin/arm-linux
     - name: Publish ARM Windows binaries
