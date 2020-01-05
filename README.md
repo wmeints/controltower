@@ -6,14 +6,32 @@ An [OctoPrint](https://octoprint.org/) inspired .NET Core based 3D Printer contr
 
 ## Goals
 
-* Provide a .NET Core based solution for controlling your 3D printer
-* Demonstrate how easy it is to run .NET Core on Raspberry PI
-* Demonstrate how to use Blazor to build rich clientside applications
+- Provide a .NET Core based solution for controlling your 3D printer
+- Demonstrate how easy it is to run .NET Core on Raspberry PI
+- Demonstrate how to use Blazor to build rich clientside applications
 
-## Current status
+## Getting started
 
-I'm in the process of settings things up and learning how my own 3D printer communicates.
-The project structure is set up, but definitely not complete!
+Download one of the releases that matches your operating system and unpack it on your system.
+Next, follow these steps for each individual os type:
+
+### Running on Windows with the portable executable
+
+From the directory where you've downloaded the controltower executable, run
+the following command:
+
+```powershell
+dotnet controltower.dll
+```
+
+### Running on Raspbian
+
+From the directory where you've downloaded the control tower executable, run
+the following command:
+
+```bash
+./controltower
+```
 
 ## Documentation
 
