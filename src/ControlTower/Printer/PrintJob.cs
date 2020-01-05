@@ -31,10 +31,10 @@ namespace ControlTower.Printer
             // The final command in the job queue is the M400 command, it tells the printer to finish its moves.
             // After that we send another command, M110, to reset the linenumber to zero.
             _commands = new Queue<PrinterCommand>(printerCommands);
-            _commands.Enqueue(new PrinterCommand(_totalCommands + 1, "M400"));
-            _commands.Enqueue(new PrinterCommand(_totalCommands + 2, "M110 N0"));
+            _commands.Enqueue(new PrinterCommand(printerCommands.Count + 1, "M400"));
+            _commands.Enqueue(new PrinterCommand(printerCommands.Count + 2, "M110 N0"));
 
-            _totalCommands = printerCommands.Count;
+            _totalCommands = printerCommands.Count + 2;
 
             _device = device;
             _statusMonitor = statusMonitor;

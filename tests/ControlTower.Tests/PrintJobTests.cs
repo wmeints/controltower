@@ -8,7 +8,7 @@ using Xunit;
 
 namespace ControlTower.Tests
 {
-    public class PrintJobTests: TestKit
+    public class PrintJobTests : TestKit
     {
         [Fact]
         public void DoesScheduleNextCommandAfterReceivingNotification()
@@ -45,16 +45,22 @@ namespace ControlTower.Tests
 
             var job = ActorOf(PrintJob.Props(commands, printer.Ref, printerMonitor.Ref));
             printerMonitor.ExpectMsg<PrintJobStatusUpdated>(cmd => cmd.State == PrintJobState.Ready);
-            
+
             job.Tell(StartPrinting.Instance, TestActor);
             printerMonitor.ExpectMsg<PrintJobStatusUpdated>(cmd => cmd.State == PrintJobState.Running);
-            printerMonitor.ExpectMsg<PrintJobStepsCompleted>(cmd => cmd.TotalSteps == 2 && cmd.StepsCompleted == 0);
-            
-            job.Tell(PrinterCommandProcessed.Instance, printer.Ref);
-            printerMonitor.ExpectMsg<PrintJobStepsCompleted>(cmd => cmd.TotalSteps == 2 && cmd.StepsCompleted == 1);
+            printerMonitor.ExpectMsg<PrintJobStepsCompleted>(cmd => cmd.TotalSteps == 4 && cmd.StepsCompleted == 0);
 
             job.Tell(PrinterCommandProcessed.Instance, printer.Ref);
-            printerMonitor.ExpectMsg<PrintJobStepsCompleted>(cmd => cmd.TotalSteps == 2 && cmd.StepsCompleted == 2);
+            printerMonitor.ExpectMsg<PrintJobStepsCompleted>(cmd => cmd.TotalSteps == 4 && cmd.StepsCompleted == 1);
+
+            job.Tell(PrinterCommandProcessed.Instance, printer.Ref);
+            printerMonitor.ExpectMsg<PrintJobStepsCompleted>(cmd => cmd.TotalSteps == 4 && cmd.StepsCompleted == 2);
+
+            job.Tell(PrinterCommandProcessed.Instance, printer.Ref);
+            printerMonitor.ExpectMsg<PrintJobStepsCompleted>(cmd => cmd.TotalSteps == 4 && cmd.StepsCompleted == 3);
+
+            job.Tell(PrinterCommandProcessed.Instance, printer.Ref);
+            printerMonitor.ExpectMsg<PrintJobStepsCompleted>(cmd => cmd.TotalSteps == 4 && cmd.StepsCompleted == 4);
             printerMonitor.ExpectMsg<PrintJobStatusUpdated>(cmd => cmd.State == PrintJobState.Completed);
         }
     }
