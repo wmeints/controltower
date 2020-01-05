@@ -1,4 +1,4 @@
-name: Build releases
+name: Verify code quality
 
 on: [push]
 
