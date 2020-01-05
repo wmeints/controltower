@@ -28,9 +28,11 @@ namespace ControlTower.Printer
             var printerCommands = commands.ToList();
 
             // Enqueue the print job commands, including a reset line number command.
-            // This last command ensures that we can print a second time.
+            // The final command in the job queue is the M400 command, it tells the printer to finish its moves.
+            // After that we send another command, M110, to reset the linenumber to zero.
             _commands = new Queue<PrinterCommand>(printerCommands);
-            _commands.Enqueue(new PrinterCommand(_totalCommands + 1, "M110 N0"));
+            _commands.Enqueue(new PrinterCommand(_totalCommands + 1, "M400"));
+            _commands.Enqueue(new PrinterCommand(_totalCommands + 2, "M110 N0"));
 
             _totalCommands = printerCommands.Count;
 
