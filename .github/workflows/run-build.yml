@@ -1,0 +1,20 @@
+name: Build releases
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.0.100
+      - name: Restore packages
+        run: dotnet restore
+      - name: Build binaries
+        run: dotnet build -c Release --no-restore
+      - name: Run tests
+        run: dotnet test --no-restore
