@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Akka.Actor;
@@ -231,14 +232,14 @@ namespace ControlTower.Printer
                     if (m.Groups["targetTemp"].Success)
                     {
                         return new TemperatureReading(
-                            float.Parse(m.Groups["temp"].Value),
-                            float.Parse(m.Groups["targetTemp"].Value)
+                            float.Parse(m.Groups["temp"].Value, CultureInfo.InvariantCulture),
+                            float.Parse(m.Groups["targetTemp"].Value, CultureInfo.InvariantCulture)
                         );
                     }
                     else
                     {
                         return new TemperatureReading(
-                            float.Parse(m.Groups["temp"].Value),
+                            float.Parse(m.Groups["temp"].Value, CultureInfo.InvariantCulture),
                             null
                         );
                     }
