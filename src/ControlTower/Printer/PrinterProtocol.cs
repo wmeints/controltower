@@ -103,6 +103,9 @@ namespace ControlTower.Printer
             Receive<TransportConnected>(_ =>
             {
                 _printer.Tell(ProtocolConnected.Instance);
+                
+                // Always send a M110 N0 to make sure that we start with a clean slate.
+                _transport.Tell(new PrinterCommand(null, "M110 N0"));
 
                 Stash.UnstashAll();
                 Become(Idle);
